@@ -33,16 +33,23 @@ jobs:
           npx cap sync android
 
       - name: Write signing key
+        id: key
         env:
           KEYSTORE_BASE64: ${{ secrets.FASTTIME_KEYSTORE_BASE64 }}
         run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then echo "::error::FASTTIME_KEYSTORE_BASE64 secret is missing"; exit 1; fi
-          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/fasttime-release.jks"
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::Signing secrets are missing, so this build only checks that the app compiles. Phones can't install an unsigned APK."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/fasttime-release.jks"
+            echo "path=$RUNNER_TEMP/fasttime-release.jks" >> "$GITHUB_OUTPUT"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Build signed APK
+      - name: Build APK
         working-directory: android
         env:
-          FASTTIME_KEYSTORE_PATH: ${{ runner.temp }}/fasttime-release.jks
+          FASTTIME_KEYSTORE_PATH: ${{ steps.key.outputs.path }}
           FASTTIME_KEYSTORE_PASSWORD: ${{ secrets.FASTTIME_KEYSTORE_PASSWORD }}
           FASTTIME_VERSION_CODE: ${{ github.run_number }}
           FASTTIME_VERSION_NAME: 1.${{ github.run_number }}
@@ -55,9 +62,12 @@ jobs:
               while IFS= read -r line; do echo "::error::${line//%/%25}"; done
             exit 1
           fi
-          mv app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/FastTime-1.${{ github.run_number }}.apk"
+          if [ "${{ steps.key.outputs.signed }}" = "true" ]; then
+            mv app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/FastTime-1.${{ github.run_number }}.apk"
+          fi
 
       - uses: actions/upload-artifact@v5
+        if: steps.key.outputs.signed == 'true'
         with:
           name: FastTime-android-1.${{ github.run_number }}
           path: FastTime-*.apk
