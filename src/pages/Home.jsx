@@ -6,6 +6,7 @@ import AdjustStart from "@/components/fasting/AdjustStart";
 import FastingSettings from "@/components/fasting/FastingSettings";
 import HistoryList from "@/components/fasting/HistoryList";
 import WeeklySummary from "@/components/fasting/WeeklySummary";
+import InstallHint from "@/components/InstallHint";
 import {
   activeEntry,
   endOf,
@@ -54,7 +55,7 @@ export default function Home() {
         }}
       />
 
-      <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-6 pb-12 pt-8">
+      <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-6 pb-safe pt-safe">
         <header className="flex items-center justify-between">
           <span className="font-display text-[12px] uppercase tracking-[0.42em] text-white/45">
             Fastline
@@ -141,6 +142,7 @@ export default function Home() {
           <p className="mt-6 text-center text-[11px] text-white/25">
             Saved on this phone only.
           </p>
+          <InstallHint />
         </section>
       </div>
 

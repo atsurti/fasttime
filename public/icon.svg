@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="#7C5CFF" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#7C5CFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="arc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B9AEFF"/>
+      <stop offset="100%" stop-color="#4B3AC9"/>
+    </linearGradient>
+    <linearGradient id="dot" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F5C08A"/>
+      <stop offset="100%" stop-color="#DE7F42"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="#08080C"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <!-- track -->
+  <circle cx="256" cy="256" r="128" fill="none" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="30"/>
+  <!-- progress arc: three quarters, starting at 12 o'clock -->
+  <circle cx="256" cy="256" r="128" fill="none" stroke="url(#arc)" stroke-width="30" stroke-linecap="round"
+          stroke-dasharray="603.2 804.25" transform="rotate(-90 256 256)"/>
+  <!-- the end of the fast: amber dot at 9 o'clock -->
+  <circle cx="128" cy="256" r="21" fill="url(#dot)"/>
+</svg>
