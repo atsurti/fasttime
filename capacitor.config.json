@@ -1,0 +1,14 @@
+{
+  "appId": "com.alisurti.fasttime",
+  "appName": "FastTime",
+  "webDir": "dist",
+  "backgroundColor": "#08080C",
+  "android": {
+    "backgroundColor": "#08080C"
+  },
+  "plugins": {
+    "SystemBars": {
+      "style": "DARK"
+    }
+  }
+}

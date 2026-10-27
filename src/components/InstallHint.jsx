@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Share, X } from "lucide-react";
+import { isNative } from "@/lib/native";
 
 const DISMISS_KEY = "fastline.installHint.dismissed";
 
@@ -30,7 +31,7 @@ function readDismissed() {
 // A small, dismissible nudge to put FastTime on the home screen. It never
 // shows once the app is running from the home screen.
 export default function InstallHint() {
-  const [hidden, setHidden] = useState(() => isStandalone() || readDismissed());
+  const [hidden, setHidden] = useState(() => isNative || isStandalone() || readDismissed());
   const [promptEvent, setPromptEvent] = useState(null);
   const os = platform();
 

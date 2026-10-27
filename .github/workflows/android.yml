@@ -1,0 +1,55 @@
+name: Android app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Build the web app and copy it into Android
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: Write signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.FASTTIME_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then echo "::error::FASTTIME_KEYSTORE_BASE64 secret is missing"; exit 1; fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/fasttime-release.jks"
+
+      - name: Build signed APK
+        working-directory: android
+        env:
+          FASTTIME_KEYSTORE_PATH: ${{ runner.temp }}/fasttime-release.jks
+          FASTTIME_KEYSTORE_PASSWORD: ${{ secrets.FASTTIME_KEYSTORE_PASSWORD }}
+          FASTTIME_VERSION_CODE: ${{ github.run_number }}
+          FASTTIME_VERSION_NAME: 1.${{ github.run_number }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+          mv app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/FastTime-1.${{ github.run_number }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FastTime-android-1.${{ github.run_number }}
+          path: FastTime-*.apk
+          retention-days: 30

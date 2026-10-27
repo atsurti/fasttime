@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FastTime</string>
+    <string name="title_activity_main">FastTime</string>
+    <string name="package_name">com.alisurti.fasttime</string>
+    <string name="custom_url_scheme">com.alisurti.fasttime</string>
+</resources>

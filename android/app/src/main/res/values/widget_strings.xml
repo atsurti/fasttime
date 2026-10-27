@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_name">FastTime</string>
+    <string name="widget_description">Time left on your fast, at a glance.</string>
+    <string name="widget_left_to_fast">Left to fast</string>
+    <string name="widget_eat_at">You can eat at %1$s</string>
+    <string name="widget_eating_window">Eating window</string>
+    <string name="widget_you_can_eat">You can eat</string>
+    <string name="widget_since">since %1$s</string>
+    <string name="widget_finished_dinner">Finished dinner?</string>
+    <string name="widget_tap_to_log">Tap to log it</string>
+</resources>

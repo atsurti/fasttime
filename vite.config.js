@@ -13,7 +13,7 @@ export default defineConfig({
       // New versions install themselves quietly in the background and
       // take over on the next launch — there is nothing for the user to click.
       registerType: "autoUpdate",
-      injectRegister: "auto",
+      injectRegister: false, // registered in main.jsx, web only
       includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "icon.svg"],
       manifest: {
         id: "/",

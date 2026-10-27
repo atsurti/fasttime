@@ -1,5 +1,24 @@
 // Saving and opening backup files. Kept separate from the fasting maths because
 // how a file is saved depends on where the app runs (browser vs Android app).
+import { isNative } from "@/lib/native";
+
+async function saveNative(text, name) {
+  const { Filesystem, Directory, Encoding } = await import("@capacitor/filesystem");
+  const { Share } = await import("@capacitor/share");
+  const { uri } = await Filesystem.writeFile({
+    path: name,
+    data: text,
+    directory: Directory.Cache,
+    encoding: Encoding.UTF8,
+  });
+  try {
+    await Share.share({ title: "FastTime backup", files: [uri] });
+    return "shared";
+  } catch (error) {
+    if (/cancel/i.test(String(error?.message || error))) return "cancelled";
+    throw error;
+  }
+}
 
 export function backupFileName(now = new Date()) {
   const d = new Date(now);
@@ -8,6 +27,8 @@ export function backupFileName(now = new Date()) {
 }
 
 export async function saveBackupFile(text, name = backupFileName()) {
+  if (isNative) return saveNative(text, name);
+
   const file = new File([text], name, { type: "application/json" });
 
   // Phones: the share sheet lets you save to Files/Drive or send it to yourself.

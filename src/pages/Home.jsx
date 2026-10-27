@@ -7,6 +7,7 @@ import FastingSettings from "@/components/fasting/FastingSettings";
 import HistoryList from "@/components/fasting/HistoryList";
 import WeeklySummary from "@/components/fasting/WeeklySummary";
 import InstallHint from "@/components/InstallHint";
+import { isNative, syncWidget } from "@/lib/native";
 import {
   activeEntry,
   endOf,
@@ -34,7 +35,26 @@ export default function Home() {
 
   useEffect(() => {
     saveState(state);
+    syncWidget(activeEntry(state));
   }, [state]);
+
+  // Android back button: close settings if open, otherwise leave the app running
+  // in the background (like the home button) so the timer state is kept.
+  useEffect(() => {
+    if (!isNative) return undefined;
+    let handle;
+    import("@capacitor/app").then(({ App }) => {
+      handle = App.addListener("backButton", () => {
+        setSettingsOpen((open) => {
+          if (!open) App.minimizeApp();
+          return false;
+        });
+      });
+    });
+    return () => {
+      handle?.then?.((h) => h.remove());
+    };
+  }, []);
 
   const open = activeEntry(state);
   // A window left open for a day or more is treated as finished, so the screen
