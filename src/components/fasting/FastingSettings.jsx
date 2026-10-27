@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PRESETS, parseHours } from "@/lib/fasting";
+import BackupSection from "@/components/fasting/BackupSection";
 
 export default function FastingSettings({
   open,
@@ -9,6 +10,8 @@ export default function FastingSettings({
   onChange,
   defaultDinnerTime,
   onDefaultDinnerTimeChange,
+  state,
+  onRestore,
 }) {
   // The field keeps its own text while you type, and only a whole number from
   // 1 to 24 is applied — clearing it to type a new value no longer sets 1h.
@@ -17,7 +20,7 @@ export default function FastingSettings({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="border-white/10 bg-[#0C0C13] text-white sm:max-w-sm">
+      <DialogContent className="border-white/10 max-h-[90dvh] overflow-y-auto bg-[#0C0C13] text-white sm:max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal tracking-tight">
             Fasting window
@@ -79,6 +82,8 @@ export default function FastingSettings({
             Used when you log an earlier dinner, so you don't have to type it in.
           </p>
         </div>
+
+        <BackupSection state={state} onRestore={onRestore} />
       </DialogContent>
     </Dialog>
   );

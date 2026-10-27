@@ -207,3 +207,64 @@ export function weekSummary(state, now = new Date()) {
   const totalHours = Math.round(days.reduce((sum, day) => sum + day.hours, 0) * 10) / 10;
   return { days, totalHours };
 }
+
+// ---- Backup ---------------------------------------------------------------
+
+export function backupText(state, now = new Date()) {
+  return JSON.stringify(
+    { app: "fasttime", version: 1, exportedAt: new Date(now).toISOString(), state },
+    null,
+    2
+  );
+}
+
+function validDate(value) {
+  return typeof value === "string" && Number.isFinite(new Date(value).getTime());
+}
+
+function cleanEntry(raw) {
+  if (!raw || !validDate(raw.dinnerAt)) return null;
+  const hours = Number(raw.hours);
+  if (!(hours >= 1 && hours <= 24)) return null;
+  return {
+    id: typeof raw.id === "string" && raw.id ? raw.id : `f-${new Date(raw.dinnerAt).getTime()}`,
+    dinnerAt: new Date(raw.dinnerAt).toISOString(),
+    hours,
+    endedAt: validDate(raw.endedAt) ? new Date(raw.endedAt).toISOString() : null,
+  };
+}
+
+// Merge a backup into what's already here. Nothing is ever removed: fasts in the
+// backup that this phone doesn't have are added, and the phone's own settings
+// stay as they are. Throws a readable Error if the file isn't a FastTime backup.
+export function mergeBackup(state, text) {
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error("That file isn't a FastTime backup.");
+  }
+  const incoming = parsed?.app === "fasttime" ? parsed.state?.entries : null;
+  if (!Array.isArray(incoming)) throw new Error("That file isn't a FastTime backup.");
+
+  const byId = new Map(state.entries.map((e) => [e.id, e]));
+  // The same dinner may exist under a different id if it was logged twice.
+  const times = new Set(state.entries.map((e) => new Date(e.dinnerAt).getTime()));
+  let added = 0;
+  incoming.forEach((raw) => {
+    const entry = cleanEntry(raw);
+    if (!entry || byId.has(entry.id) || times.has(new Date(entry.dinnerAt).getTime())) return;
+    byId.set(entry.id, entry);
+    times.add(new Date(entry.dinnerAt).getTime());
+    added += 1;
+  });
+
+  const entries = [...byId.values()].sort(
+    (a, b) => new Date(a.dinnerAt).getTime() - new Date(b.dinnerAt).getTime()
+  );
+  // Only the newest fast may be open; any earlier open one ended at the next dinner.
+  for (let i = 0; i < entries.length - 1; i += 1) {
+    if (!entries[i].endedAt) entries[i] = { ...entries[i], endedAt: entries[i + 1].dinnerAt };
+  }
+  return { state: { ...state, entries }, added };
+}

@@ -159,6 +159,8 @@ export default function Home() {
         onDefaultDinnerTimeChange={(value) =>
           setState((prev) => setDefaultDinnerTime(prev, value))
         }
+        state={state}
+        onRestore={setState}
       />
     </div>
   );
