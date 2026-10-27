@@ -1,0 +1,8 @@
+# Used when Netlify builds from a git repo. Serving rules live in
+# public/_headers and public/_redirects so drag-and-drop deploys get them too.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
