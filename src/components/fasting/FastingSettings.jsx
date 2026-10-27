@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { PRESETS } from "@/lib/fasting";
+import { PRESETS, parseHours } from "@/lib/fasting";
 
 export default function FastingSettings({
   open,
@@ -10,6 +10,11 @@ export default function FastingSettings({
   defaultDinnerTime,
   onDefaultDinnerTimeChange,
 }) {
+  // The field keeps its own text while you type, and only a whole number from
+  // 1 to 24 is applied — clearing it to type a new value no longer sets 1h.
+  const [draft, setDraft] = useState(String(hours));
+  useEffect(() => setDraft(String(hours)), [hours]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-white/10 bg-[#0C0C13] text-white sm:max-w-sm">
@@ -42,10 +47,16 @@ export default function FastingSettings({
           <span className="text-sm text-white/60">Custom hours</span>
           <input
             type="number"
+            inputMode="numeric"
             min="1"
             max="24"
-            value={hours}
-            onChange={(e) => onChange(Number(e.target.value))}
+            value={draft}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              const next = parseHours(e.target.value);
+              if (next !== null && next !== hours) onChange(next);
+            }}
+            onBlur={() => setDraft(String(hours))}
             className="tnum w-16 bg-transparent text-right text-lg text-white outline-none"
           />
         </div>

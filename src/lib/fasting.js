@@ -47,6 +47,12 @@ export function endOf(entry) {
 }
 
 export function logDinner(state, date) {
+  const open = activeEntry(state);
+  if (open && new Date(date).getTime() <= new Date(open.dinnerAt).getTime()) {
+    // An "earlier" dinner before the fast that's already running can't close it —
+    // the user is correcting when that fast began.
+    return updateActiveStart(state, date);
+  }
   const dinnerAt = new Date(date).toISOString();
   const entries = state.entries.map((e) => (e.endedAt ? e : { ...e, endedAt: dinnerAt }));
   entries.push({
@@ -66,12 +72,14 @@ export function updateActiveStart(state, date) {
   };
 }
 
-export function setFastingHours(state, hours) {
+export function setFastingHours(state, hours, now = Date.now()) {
   const next = Math.min(24, Math.max(1, Math.round(hours) || 1));
   return {
     ...state,
     fastingHours: next,
-    entries: state.entries.map((e) => (e.endedAt ? e : { ...e, hours: next })),
+    // Only a fast that's still running takes the new length; one whose window
+    // has already opened is history and keeps the length it had.
+    entries: state.entries.map((e) => (isFasting(e, now) ? { ...e, hours: next } : e)),
   };
 }
 
@@ -137,10 +145,34 @@ function dateKey(date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
+// Hours actually fasted: from dinner until the window opened, or until now if it
+// hasn't yet. Time after the window opens is eating time, so it never counts —
+// even if the next dinner is logged late or not at all.
 export function entryHours(entry, now = Date.now()) {
   const start = new Date(entry.dinnerAt).getTime();
-  const end = entry.endedAt ? new Date(entry.endedAt).getTime() : now;
-  return Math.max(0, (end - start) / 3600000);
+  const stop = entry.endedAt ? new Date(entry.endedAt).getTime() : now;
+  const elapsed = Math.max(0, (stop - start) / 3600000);
+  return Math.min(elapsed, Number(entry.hours) || 0);
+}
+
+// 5) An eating window that's been open long enough that the next dinner has
+// surely happened. Past this point the app goes back to "Finished dinner?".
+export function isStale(entry, now = Date.now()) {
+  if (!entry) return false;
+  const limitHours = Math.max(24, (Number(entry.hours) || 0) + 4);
+  return now - new Date(entry.dinnerAt).getTime() >= limitHours * 3600000;
+}
+
+export function isFasting(entry, now = Date.now()) {
+  return Boolean(entry) && !entry.endedAt && endOf(entry).getTime() > now;
+}
+
+// 4) Parse the custom-hours field; null means "not a usable value yet".
+export function parseHours(value) {
+  const text = String(value).trim();
+  if (!/^\d{1,2}$/.test(text)) return null;
+  const hours = Number(text);
+  return hours >= 1 && hours <= 24 ? hours : null;
 }
 
 export function formatHours(hours) {

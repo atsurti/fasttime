@@ -11,6 +11,7 @@ import {
   activeEntry,
   endOf,
   formatClock,
+  isStale,
   loadState,
   logDinner,
   saveState,
@@ -35,7 +36,10 @@ export default function Home() {
     saveState(state);
   }, [state]);
 
-  const active = activeEntry(state);
+  const open = activeEntry(state);
+  // A window left open for a day or more is treated as finished, so the screen
+  // returns to "Finished dinner?" instead of showing an old eating window forever.
+  const active = isStale(open, now) ? null : open;
   const end = endOf(active);
   const remaining = end ? Math.max(0, end.getTime() - now) : 0;
   const fasting = Boolean(active) && remaining > 0;
@@ -138,7 +142,7 @@ export default function Home() {
           <h2 className="text-[10px] uppercase tracking-[0.34em] text-white/30">
             Recent fasts
           </h2>
-          <HistoryList entries={[...state.entries].reverse().slice(0, 5)} />
+          <HistoryList entries={[...state.entries].reverse().slice(0, 5)} now={now} />
           <p className="mt-6 text-center text-[11px] text-white/25">
             Saved on this phone only.
           </p>
