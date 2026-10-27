@@ -7,21 +7,24 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # comes with the Android SDK preinstalled
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
 
-      - uses: android-actions/setup-android@v3
+      - name: Check Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME" || { echo "::error::Android SDK not found on runner"; exit 1; }
 
       - name: Build the web app and copy it into Android
         run: |
@@ -54,7 +57,7 @@ jobs:
           fi
           mv app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/FastTime-1.${{ github.run_number }}.apk"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: FastTime-android-1.${{ github.run_number }}
           path: FastTime-*.apk
