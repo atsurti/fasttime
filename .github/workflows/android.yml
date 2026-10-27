@@ -45,7 +45,13 @@ jobs:
           FASTTIME_VERSION_NAME: 1.${{ github.run_number }}
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon assembleRelease
+          set -o pipefail
+          if ! ./gradlew --no-daemon assembleRelease 2>&1 | tee "$RUNNER_TEMP/gradle.log"; then
+            # Surface compile errors as annotations so they show on the run summary.
+            grep -E "error:|e: |FAILURE|What went wrong|AAPT|> " "$RUNNER_TEMP/gradle.log" | head -40 |
+              while IFS= read -r line; do echo "::error::${line//%/%25}"; done
+            exit 1
+          fi
           mv app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/FastTime-1.${{ github.run_number }}.apk"
 
       - uses: actions/upload-artifact@v4
