@@ -27,7 +27,7 @@ function readDismissed() {
   }
 }
 
-// A small, dismissible nudge to put Fastline on the home screen. It never
+// A small, dismissible nudge to put FastTime on the home screen. It never
 // shows once the app is running from the home screen.
 export default function InstallHint() {
   const [hidden, setHidden] = useState(() => isStandalone() || readDismissed());
@@ -79,7 +79,7 @@ export default function InstallHint() {
 
       {promptEvent ? (
         <>
-          <p className="text-xs text-white/50">Keep Fastline one tap away.</p>
+          <p className="text-xs text-white/50">Keep FastTime one tap away.</p>
           <button
             onClick={install}
             className="mt-2 rounded-xl bg-white/10 px-4 py-2 text-xs text-white/90 transition hover:bg-white/20"

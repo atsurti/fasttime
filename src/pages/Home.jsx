@@ -58,7 +58,7 @@ export default function Home() {
       <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-6 pb-safe pt-safe">
         <header className="flex items-center justify-between">
           <span className="font-display text-[12px] uppercase tracking-[0.42em] text-white/45">
-            Fastline
+            FastTime
           </span>
           <button
             onClick={() => setSettingsOpen(true)}

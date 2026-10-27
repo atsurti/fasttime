@@ -17,8 +17,8 @@ export default defineConfig({
       includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "icon.svg"],
       manifest: {
         id: "/",
-        name: "Fastline — Fasting Timer",
-        short_name: "Fastline",
+        name: "FastTime — Fasting Timer",
+        short_name: "FastTime",
         description: "Log dinner, then forget about it. A private fasting timer that works offline.",
         start_url: "/",
         scope: "/",

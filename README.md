@@ -1,4 +1,4 @@
-# Fastline
+# FastTime
 
 A phone-first intermittent fasting timer. Log when you finish dinner, then forget about it.
 
