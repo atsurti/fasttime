@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write # to publish the APK as a GitHub Release
+
 jobs:
   build:
     runs-on: ubuntu-24.04  # comes with the Android SDK preinstalled
@@ -65,6 +68,25 @@ jobs:
           if [ "${{ steps.key.outputs.signed }}" = "true" ]; then
             mv app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/FastTime-1.${{ github.run_number }}.apk"
           fi
+
+      - name: Confirm the APK is signed with the FastTime key
+        if: steps.key.outputs.signed == 'true'
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          CERT=$("$APKSIGNER" verify --print-certs FastTime-*.apk | grep "SHA-256 digest" | head -1)
+          echo "::notice::$CERT"
+
+      - name: Publish as a GitHub Release
+        if: steps.key.outputs.signed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=1.${{ github.run_number }}
+          cp FastTime-$VERSION.apk FastTime.apk
+          gh release create "v$VERSION" FastTime.apk FastTime-$VERSION.apk \
+            --title "FastTime $VERSION" \
+            --notes "Android app with home-screen widget. On your phone, download **FastTime.apk** and open it to install or update." \
+            --latest
 
       - uses: actions/upload-artifact@v5
         if: steps.key.outputs.signed == 'true'
